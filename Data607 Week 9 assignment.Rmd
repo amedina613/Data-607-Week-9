@@ -1,0 +1,67 @@
+---
+title: "Data 607 Week 9 Assignment"
+author: "Adriana Medina"
+date: "2024-03-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+The assignment for week 9 is to choose one of the New York Times APIs, construct an interface in R to read in the JSON data, and transform it into an R DataFrame. I chose an API that retrieves the most popular article for the most recent day (24hrs).
+
+# Load library
+```{r load library}
+library(httr)
+library(jsonlite)
+library(tidyverse)
+```
+
+# Get data
+```{r request raw data}
+# Construct the URL with your API key and query
+api_mpurl <- "https://api.nytimes.com/svc/mostpopular/v2/viewed/1.json?api-key=AgAzv4NC9JID11LE6CNtNgiymhhf9xX3"
+
+#fetch the raw data
+rawdata <- GET(api_mpurl)
+
+#Retrieve the status code of the HTTP response. A status code of 200 means the request was successful
+rawdata$status_code
+```
+
+```{r summary of raw data}
+summary(rawdata)
+```
+
+```{r extract}
+#Extract the content of the raw data as a character string
+extract_rawdata <- content(rawdata, as = "text")
+```
+
+# Convert from JSON-format to a df
+```{r}
+#Convert the JSON-formatted data to a data frame
+all_data <- extract_rawdata %>% 
+  fromJSON() %>% 
+  as.data.frame()
+
+colnames(all_data)
+```
+# Create another dataframe consisting of just the columns selected
+```{r final df}
+popular_articles <- all_data %>% 
+  select(results.published_date,results.title, results.nytdsection)
+```
+
+__Rename column names__
+```{r}
+colnames(popular_articles) <- c("Published Date","Popular Articles","Section")  
+
+glimpse(popular_articles)
+```
+
+
+
+
